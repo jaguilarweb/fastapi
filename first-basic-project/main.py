@@ -34,7 +34,6 @@ async def time2(iso_code: str):
 # Se cre un afunción de id, mientras no se tenga base de datos.
 db_customers: list[Customer] = []
 
-
 # Con customerCreate estamos recibiendo datos, sin id.
 # Con response_model=Customer devolvemos el modelo Customer, con id.
 @app.post("/customers", response_model=Customer)
@@ -48,6 +47,15 @@ async def create_customer(customer_data: CustomerCreate):
 @app.get("/customers", response_model=list[Customer])
 async def list_customers():
     return db_customers
+
+
+@app.get("/customers/{customer_id}", response_model=Customer)
+async def get_customer(customer_id: int):
+    for customer in db_customers:
+        if customer.id == customer_id:
+            return customer
+    return {"error": "Customer not found"}
+
 
 @app.post("/transactions")
 async def create_transaction(transaction_data: Transaction):
