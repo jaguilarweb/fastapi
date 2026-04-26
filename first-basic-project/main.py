@@ -3,6 +3,8 @@ from datetime import datetime
 
 from fastapi import FastAPI
 from models import Customer, Transaction, Invoice, CustomerCreate, Transaction, Invoice
+from db import SessionDep
+
 
 app = FastAPI()
 
@@ -37,7 +39,7 @@ db_customers: list[Customer] = []
 # Con customerCreate estamos recibiendo datos, sin id.
 # Con response_model=Customer devolvemos el modelo Customer, con id.
 @app.post("/customers", response_model=Customer)
-async def create_customer(customer_data: CustomerCreate):
+async def create_customer(customer_data: CustomerCreate, session: SessionDep):
     customer = Customer.model_validate(customer_data.model_dump()) # Validamos los datos recibidos
     # Asumiendo que lo hace la base de datos (fake).
     customer.id = len(db_customers)
