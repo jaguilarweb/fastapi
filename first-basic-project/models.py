@@ -1,17 +1,19 @@
 from pydantic import BaseModel, EmailStr
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, Field
+
+# Es requerido agregar el Field para que se cree en la base de datos.
 
 class CustomerBase(SQLModel):
-    name: str
-    description: str | None
-    email: EmailStr
-    age: int
+    name: str = Field(default=None) # Para crear un índice en la base de datos
+    description: str | None = Field(default=None)
+    email: EmailStr = Field(default=None)
+    age: int = Field(default=None)
 
 class CustomerCreate(CustomerBase):
     pass
 
 class Customer(CustomerBase, table=True):
-    id: int | None = None
+    id: int | None = Field(default=None, primary_key=True)
 
 
 class Transaction(BaseModel):

@@ -3,10 +3,10 @@ from datetime import datetime
 
 from fastapi import FastAPI
 from models import Customer, Transaction, Invoice, CustomerCreate, Transaction, Invoice
-from db import SessionDep
+from db import SessionDep, create_all_tables
 
 
-app = FastAPI()
+app = FastAPI(lifespan=create_all_tables)
 
 @app.get("/")
 async def root():
