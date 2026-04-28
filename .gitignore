@@ -80,3 +80,4 @@ Thumbs.db
 
 # Course materials
 material_curso/
+*.sqlite3
