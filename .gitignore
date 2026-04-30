@@ -80,4 +80,5 @@ Thumbs.db
 
 # Course materials
 material_curso/
+first-basic-project/db.sqlite3
 *.sqlite3
