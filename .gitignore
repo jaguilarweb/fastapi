@@ -79,6 +79,6 @@ coverage.xml
 Thumbs.db
 
 # Course materials
-material_curso/
+z_material_curso/
 first-basic-project/db.sqlite3
 *.sqlite3
