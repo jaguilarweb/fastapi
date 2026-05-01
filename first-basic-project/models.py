@@ -1,6 +1,7 @@
 from enum import Enum
-from pydantic import BaseModel, EmailStr
-from sqlmodel import SQLModel, Field, Relationship
+from pydantic import BaseModel, EmailStr, field_validator
+from sqlmodel import SQLModel, Field, Relationship, Session, select
+from db import engine
 
 #---------------------------
 # Plan
@@ -31,8 +32,25 @@ class Plan(SQLModel, table=True):
 class CustomerBase(SQLModel):
     name: str = Field(default=None) # Para crear un índice en la base de datos
     description: str | None = Field(default=None)
-    email: EmailStr = Field(default=None)
+    email: EmailStr = Field(default=None) # Valida que el campo sea un correo electrónico
     age: int = Field(default=None)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value):
+        session = Session(engine)
+        query = select(Customer).where(Customer.email == value)
+        result = session.exec(query).first()
+        if result:
+            raise ValueError("Email already exists")
+        return value
+
+# Esta validación del correo contra una consulta a la base de datos es un ejemplo, 
+# pero no es recomendable hacerla así en un entorno de producción, 
+# ya que puede generar problemas de concurrencia. 
+# En un entorno de producción, se recomienda manejar esta validación a nivel de base de datos, 
+# por ejemplo, creando un índice único en el campo email.
+
 
 class CustomerCreate(CustomerBase):
     pass
