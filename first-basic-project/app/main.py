@@ -3,13 +3,14 @@ from datetime import datetime
 from fastapi import FastAPI
 from models import  Transaction, Invoice, Transaction, Invoice
 from db import create_all_tables
-from .routers import customers, transactions
+from .routers import customers, transactions, plans
 
 
 app = FastAPI(lifespan=create_all_tables)
 # Incluimos el router de customers en la aplicación principal
 app.include_router(customers.router)
 app.include_router(transactions.router)
+app.include_router(plans.router)
 
 
 @app.get("/")

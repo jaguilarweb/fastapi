@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, HTTPException
 from sqlmodel import select
 
-from models import Customer, CustomerCreate, CustomerUpdate
+from models import Customer, CustomerCreate, CustomerUpdate, CustomerPlan, Plan
 from db import SessionDep
 
 
@@ -55,5 +55,32 @@ async def edit_customer(customer_id: int, customer_data: CustomerUpdate , sessio
     session.refresh(customer_db) # Actualiza valor en memoria
     return customer_db
 
+@router.post("/customers/{customer_id}/plans/{plan_id}", status_code=status.HTTP_201_CREATED, tags=["Customers"])
+async def suscribe_customer_to_plan(customer_id: int, plan_id: int, session: SessionDep):
+    customer_db = session.get(Customer, customer_id)
+    if not customer_db:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Customer doesn't exist"
+        )
+    
+    plan_db = session.get(Plan, plan_id)
+    if not plan_db:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Plan doesn't exist"
+        )
+    
+    customer_plan_db = CustomerPlan(customer_id=customer_db.id, plan_id=plan_db.id)
+    session.add(customer_plan_db)
+    session.commit()
+    session.refresh(customer_plan_db) # Actualiza valor en memoria
+    return customer_plan_db
 
-
+@router.get("/customers/{customer_id}/plans", response_model=list[Plan], tags=["Customers"])
+async def get_customer_plans(customer_id: int, session: SessionDep):
+    customer_db = session.get(Customer, customer_id)
+    if not customer_db:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Customer doesn't exist"
+        )
+    
+    return customer_db.plans
