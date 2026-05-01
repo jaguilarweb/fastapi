@@ -1,7 +1,9 @@
 from pydantic import BaseModel, EmailStr
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 
-# Es requerido agregar el Field para que se cree en la base de datos.
+#---------------------------
+# Customer
+#---------------------------
 
 class CustomerBase(SQLModel):
     name: str = Field(default=None) # Para crear un índice en la base de datos
@@ -15,24 +17,50 @@ class CustomerCreate(CustomerBase):
 class CustomerUpdate(CustomerBase):
     pass
 
-
 class Customer(CustomerBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
+    transactions: list["Transaction"] = Relationship(back_populates="customer")
 
 
-class Transaction(BaseModel):
-    id: int
-    amount: int # Mejor que usar el tipo float para evitar problemas de precisión
-    description: str | None
+#---------------------------
+# Transaction
+#---------------------------
 
+class TransactionBase(SQLModel):
+    amount: int | None = Field(default=None)
+    description: str | None =Field(default=None)
 
-class Invoice(BaseModel):
-    id: int
-    customer: Customer
-    transactions: list[Transaction]
-    total: int 
+class TransactionCreate(TransactionBase):
+    customer_id: int = Field(foreign_key="customer.id")
+    pass
+
+class TransactionUpdate(TransactionBase):
+    pass
+
+class Transaction(TransactionBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    customer_id : int = Field(default=None, foreign_key="customer.id")
+    customer: Customer = Relationship(back_populates="transactions")
+#---------------------------
+# Invoice
+#---------------------------
+
+class InvoiceBase(SQLModel):
+    customer: Customer = Field(default=None)
+    transactions: list[Transaction] = Field(default=None)
+    total: int = Field(default=None)
 
     # Metodo
     @property
     def total(self):
         return sum(transaction.amount for transaction in self.transactions)
+    
+
+class InvoiceCreate(InvoiceBase):
+    pass
+
+class InvoiceUpdate(InvoiceBase):
+    pass
+
+class Invoice(InvoiceBase):
+    id: int | None = Field(default=None, primary_key=True)
