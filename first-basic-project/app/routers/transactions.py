@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, Query, status, HTTPException
 from sqlmodel import select
 # Importar el modelo de transacción
 from models import Customer, Transaction, TransactionCreate, TransactionUpdate
@@ -25,8 +25,8 @@ async def create_transaction(transaction_data: TransactionCreate, session: Sessi
 
 # GET ALL
 @router.get("/transactions", response_model=list[Transaction], tags=["Transactions"], status_code=status.HTTP_200_OK)
-async def list_transactions(session: SessionDep):
-    query = select(Transaction)
+async def list_transactions(session: SessionDep, skip: int = Query(0, description="Registros a omitir" ), limit: int = Query(10, description="Número máximo de registros a retornar")):
+    query = select(Transaction).offset(skip).limit(limit)
     transaction = session.exec(query).all()
     return transaction
 
