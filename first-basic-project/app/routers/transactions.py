@@ -7,7 +7,6 @@ from db import SessionDep
 
 router = APIRouter()
 
-
 # CREATE
 @router.post("/transactions", response_model=Transaction, tags=["Transactions"], status_code=status.HTTP_201_CREATED)
 async def create_transaction(transaction_data: TransactionCreate, session: SessionDep):
@@ -23,11 +22,13 @@ async def create_transaction(transaction_data: TransactionCreate, session: Sessi
     session.refresh(transaction_db)
     return transaction_db
 
+
 # GET ALL
 @router.get("/transactions", response_model=list[Transaction], tags=["Transactions"], status_code=status.HTTP_200_OK)
 async def list_transactions(session: SessionDep):
-    return session.exec(select(Transaction)).all()
-
+    query = select(Transaction)
+    transaction = session.exec(query).all()
+    return transaction
 
 # GET BY ID
 @router.get("/transactions/{transaction_id}", response_model=Transaction, tags=["Transactions"], status_code=status.HTTP_200_OK)
