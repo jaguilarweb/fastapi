@@ -1,6 +1,8 @@
+from typing import Annotated
 import zoneinfo, time
 from datetime import datetime
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request, Depends, status
+from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from models import  Transaction, Invoice, Transaction, Invoice
 from db import create_all_tables
 from .routers import customers, transactions, plans
@@ -20,9 +22,17 @@ async def log_request_time(request: Request, call_next):
     print(f"Request: {request.method} {request.url} completed in {process_time:.4f} seconds")
     return response
 
+security = HTTPBasic()
+
 @app.get("/")
-async def root():
-    return{"message" : "hello world"}
+async def root(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
+    print(credentials)
+    if credentials.username == "carmen" and credentials.password == "password":
+        return{"message" : f"Hola {credentials.username}, bienvenido a la API de facturación!"}
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales inválidas")
+
+
 
 country_timezones = {
     "CO": "America/Bogota",
